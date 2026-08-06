@@ -563,59 +563,83 @@ PATCH /api/blood-requests/{id}/status   (marcar FULFILLED o CANCELLED)
 
 ## Configuración
 
-### `application.properties`
+La app usa **perfiles de Spring** para separar entorno local y producción (Railway) sin cambiar código.
 
-Propiedades principales (ver archivo para valores completos):
+| Perfil | Archivo | Cuándo se usa |
+|--------|---------|---------------|
+| `local` (default) | `application-local.properties` | Desarrollo en tu máquina |
+| `prod` | `application-prod.properties` | Railway |
+| `test` | `src/test/resources/application.properties` | Tests (H2) |
+
+### `application.properties` (común)
+
+Propiedades compartidas por todos los perfiles:
 
 ```properties
-spring.profiles.active=local
+spring.profiles.active=${SPRING_PROFILES_ACTIVE:local}
 
-# Auth0
-auth0.domain=dev-njzfy2r5ryn8mnpt.us.auth0.com
-auth0.audience=donate
-spring.security.oauth2.resourceserver.jwt.issuer-uri=https://${auth0.domain}/
-spring.security.oauth2.resourceserver.jwt.audiences=${auth0.audience}
+auth0.domain=${AUTH0_DOMAIN:dev-njzfy2r5ryn8mnpt.us.auth0.com}
+auth0.client-id=${AUTH0_CLIENT_ID:ZlYTdPZzhbZset4swCnOPhnNrv585PRV}
+auth0.audience=${AUTH0_AUDIENCE:donate}
 
-# Server & MySQL (variables de entorno)
 server.port=${PORT:8080}
-spring.datasource.url=jdbc:mysql://${MYSQLHOST}:${MYSQLPORT}/${MYSQL_DATABASE}
-spring.datasource.username=${MYSQLUSER}
-spring.datasource.password=${MYSQL_PASSWORD}
 spring.jpa.hibernate.ddl-auto=update
-
-# Nominatim
-nominatim.base-url=https://nominatim.openstreetmap.org
-nominatim.user-agent=DonateApp/1.0 (contact: ${NOMINATIM_CONTACT_EMAIL})
-nominatim.max-results=5
+spring.jpa.open-in-view=false
 ```
+
+No contiene configuración de datasource — eso vive en el perfil activo.
 
 ### Perfil local (`application-local.properties`)
 
-Archivo gitignored para credenciales locales. Copiar desde el ejemplo:
+Archivo **gitignored** con credenciales de MySQL local. Copiar desde el ejemplo:
 
 ```bash
 cp src/main/resources/application-local.properties.example src/main/resources/application-local.properties
 ```
 
 ```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/donate?useSSL=false&...
 spring.datasource.username=root
 spring.datasource.password=TU_PASSWORD
-nominatim.user-agent=DonateApp/1.0 (contact: tu-email@dominio.com)
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 ```
+
+Por defecto arranca con perfil `local` (no hace falta setear nada).
+
+### Perfil prod — Railway (`application-prod.properties`)
+
+```properties
+spring.datasource.url=jdbc:mysql://${MYSQLHOST}:${MYSQLPORT}/${MYSQL_DATABASE}
+spring.datasource.username=${MYSQLUSER}
+spring.datasource.password=${MYSQL_PASSWORD}
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+```
+
+En Railway solo hay que configurar:
+
+```
+SPRING_PROFILES_ACTIVE=prod
+```
+
+Las variables `MYSQLHOST`, `MYSQLPORT`, `MYSQL_DATABASE`, `MYSQLUSER` y `MYSQL_PASSWORD` se referencian desde el servicio MySQL de Railway.
 
 > Nominatim **requiere un email de contacto real** en el User-Agent. Bloquea direcciones `@example.com`.
 
-### Variables de entorno (`.env.example`)
+### Variables de entorno
 
-| Variable | Ejemplo | Descripción |
-|----------|---------|-------------|
-| `PORT` | `8080` | Puerto del servidor |
-| `MYSQLHOST` | `localhost` | Host MySQL |
-| `MYSQLPORT` | `3306` | Puerto MySQL |
-| `MYSQL_DATABASE` | `donate` | Nombre de la base |
-| `MYSQLUSER` | `donate` | Usuario MySQL |
-| `MYSQL_PASSWORD` | `secret` | Contraseña MySQL |
-| `NOMINATIM_CONTACT_EMAIL` | — | Email para User-Agent de Nominatim |
+| Variable | Perfil | Descripción |
+|----------|--------|-------------|
+| `SPRING_PROFILES_ACTIVE` | todos | `local` (default) o `prod` |
+| `PORT` | todos | Puerto del servidor (Railway lo inyecta) |
+| `MYSQLHOST` | prod | Host MySQL (Railway) |
+| `MYSQLPORT` | prod | Puerto MySQL (Railway) |
+| `MYSQL_DATABASE` | prod | Nombre de la base (Railway) |
+| `MYSQLUSER` | prod | Usuario MySQL (Railway) |
+| `MYSQL_PASSWORD` | prod | Contraseña MySQL (Railway) |
+| `AUTH0_DOMAIN` | todos | Override del dominio Auth0 |
+| `AUTH0_CLIENT_ID` | todos | Override del client ID Auth0 |
+| `AUTH0_AUDIENCE` | todos | Override del audience Auth0 |
+| `NOMINATIM_CONTACT_EMAIL` | todos | Email para User-Agent de Nominatim |
 
 ### CORS
 

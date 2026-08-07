@@ -609,13 +609,13 @@ Por defecto arranca con perfil `local` (no hace falta setear nada).
 ### Perfil prod — Railway (`application-prod.properties`)
 
 ```properties
-spring.datasource.url=jdbc:mysql://${MYSQLHOST}:${MYSQLPORT}/${MYSQLDATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+spring.datasource.url=jdbc:mysql://${MYSQLHOST}:${MYSQLPORT}/donate?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
 spring.datasource.username=${MYSQLUSER}
 spring.datasource.password=${MYSQLPASSWORD}
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 ```
 
-En Railway, vinculá el servicio MySQL al backend. Las variables `MYSQLHOST`, `MYSQLPORT`, `MYSQLDATABASE`, `MYSQLUSER` y `MYSQLPASSWORD` las inyecta Railway automáticamente.
+En Railway, vinculá el servicio MySQL al backend. Usa `MYSQLHOST`, `MYSQLPORT`, `MYSQLUSER` y `MYSQLPASSWORD` de Railway, pero el **schema siempre es `donate`** (no `railway`).
 
 El perfil `prod` se activa solo cuando Railway expone `MYSQLHOST` o `RAILWAY_ENVIRONMENT`. También podés forzar:
 
@@ -637,7 +637,6 @@ NOMINATIM_CONTACT_EMAIL=tu-email@dominio.com
 | `PORT` | todos | Puerto del servidor (Railway lo inyecta) |
 | `MYSQLHOST` | prod | Host MySQL (Railway) |
 | `MYSQLPORT` | prod | Puerto MySQL (Railway) |
-| `MYSQLDATABASE` | prod | Nombre de la base (Railway) |
 | `MYSQLUSER` | prod | Usuario MySQL (Railway) |
 | `MYSQLPASSWORD` | prod | Contraseña MySQL (Railway) |
 | `AUTH0_DOMAIN` | todos | Override del dominio Auth0 |

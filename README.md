@@ -609,33 +609,37 @@ Por defecto arranca con perfil `local` (no hace falta setear nada).
 ### Perfil prod — Railway (`application-prod.properties`)
 
 ```properties
-spring.datasource.url=jdbc:mysql://${MYSQLHOST}:${MYSQLPORT}/${MYSQL_DATABASE}
+spring.datasource.url=jdbc:mysql://${MYSQLHOST}:${MYSQLPORT}/${MYSQLDATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
 spring.datasource.username=${MYSQLUSER}
-spring.datasource.password=${MYSQL_PASSWORD}
+spring.datasource.password=${MYSQLPASSWORD}
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 ```
 
-En Railway solo hay que configurar:
+En Railway, vinculá el servicio MySQL al backend. Las variables `MYSQLHOST`, `MYSQLPORT`, `MYSQLDATABASE`, `MYSQLUSER` y `MYSQLPASSWORD` las inyecta Railway automáticamente.
+
+El perfil `prod` se activa solo cuando Railway expone `MYSQLHOST` o `RAILWAY_ENVIRONMENT`. También podés forzar:
 
 ```
 SPRING_PROFILES_ACTIVE=prod
 ```
 
-Las variables `MYSQLHOST`, `MYSQLPORT`, `MYSQL_DATABASE`, `MYSQLUSER` y `MYSQL_PASSWORD` se referencian desde el servicio MySQL de Railway.
+Variables adicionales recomendadas en Railway:
 
-> Nominatim **requiere un email de contacto real** en el User-Agent. Bloquea direcciones `@example.com`.
+```
+NOMINATIM_CONTACT_EMAIL=tu-email@dominio.com
+```
 
 ### Variables de entorno
 
 | Variable | Perfil | Descripción |
 |----------|--------|-------------|
-| `SPRING_PROFILES_ACTIVE` | todos | `local` (default) o `prod` |
+| `SPRING_PROFILES_ACTIVE` | todos | `local` (default) o `prod` (auto en Railway) |
 | `PORT` | todos | Puerto del servidor (Railway lo inyecta) |
 | `MYSQLHOST` | prod | Host MySQL (Railway) |
 | `MYSQLPORT` | prod | Puerto MySQL (Railway) |
-| `MYSQL_DATABASE` | prod | Nombre de la base (Railway) |
+| `MYSQLDATABASE` | prod | Nombre de la base (Railway) |
 | `MYSQLUSER` | prod | Usuario MySQL (Railway) |
-| `MYSQL_PASSWORD` | prod | Contraseña MySQL (Railway) |
+| `MYSQLPASSWORD` | prod | Contraseña MySQL (Railway) |
 | `AUTH0_DOMAIN` | todos | Override del dominio Auth0 |
 | `AUTH0_CLIENT_ID` | todos | Override del client ID Auth0 |
 | `AUTH0_AUDIENCE` | todos | Override del audience Auth0 |

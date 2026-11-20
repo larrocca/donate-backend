@@ -35,7 +35,8 @@ public class DonorEnrollmentService {
 
     @Transactional
     public DonorEnrollmentResponse enroll(Jwt jwt, Long bloodRequestId) {
-        User donor = userService.requireAuthenticatedUser(jwt);
+        // Take the lock before any consistent read can establish an InnoDB snapshot.
+        User donor = userService.requireAuthenticatedUserForUpdate(jwt);
         if (!donor.isProfileComplete()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Complete your profile before enrolling");
         }

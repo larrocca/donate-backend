@@ -47,6 +47,11 @@ public class UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
+    User requireAuthenticatedUserForUpdate(Jwt jwt) {
+        return userRepository.findByAuth0IdForUpdate(jwt.getSubject())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
     @Transactional(readOnly = true)
     public UserResponse getProfile(Jwt jwt) {
         User user = requireAuthenticatedUser(jwt);
